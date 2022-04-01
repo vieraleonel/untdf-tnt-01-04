@@ -1,0 +1,32 @@
+######################
+####### stage 1 ######
+######################
+FROM node:16.14.2-alpine3.15 AS dependencies
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install 
+
+######################
+####### stage 2 ######
+######################
+FROM dependencies AS dev
+COPY . .
+CMD [ "npm", "start" ]
+
+######################
+####### stage 3 ######
+######################
+FROM dependencies AS builder
+COPY . .
+RUN npm run build
+
+######################
+####### stage 4 ######
+######################
+FROM nginx:1.19.0 AS prod
+WORKDIR /usr/share/nginx/html
+# Remove default nginx static resources
+RUN rm -rf ./*
+# Copies static resources from builder stage
+COPY --from=builder /app/build .
+CMD ["nginx", "-g", "daemon off;"]

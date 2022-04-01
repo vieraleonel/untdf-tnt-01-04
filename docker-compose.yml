@@ -1,0 +1,11 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: ./docker/Dockerfile.multistage
+      target: dev
+    image: crapp-multistage-dev-dc
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/app
